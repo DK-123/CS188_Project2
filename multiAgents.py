@@ -75,7 +75,63 @@ class ReflexAgent(Agent):
         newScaredTimes = [ghostState.scaredTimer for ghostState in newGhostStates]
 
         "*** YOUR CODE HERE ***"
-        return successorGameState.getScore()
+
+        ''' 
+        Notes
+        
+        from the assignment spec:
+        Note: Remember that newFood has the function asList()
+
+        Note: As features, try the reciprocal of important values (such as distance to food) rather than 
+        just the values themselves.
+
+        - use floats
+        - have 2 main components (food and ghost)
+        - food component - reward being close to the nearest food pellet
+            Using reciprocal of distance so closer food = much higher score 
+            (aka being 1 away gives +1.0, being 10 away gives +0.1)
+            Calculate distance to each food pellet and find minimum distance
+
+        - ghost component - penalize being close to active ghosts and reward being close to scared ghosts (we can eat them)
+        '''
+
+        score =  successorGameState.getScore()
+
+        # print(score)
+        # print(newPos)
+        # print(newFood)
+        # print(newGhostStates)
+        # print(newScaredTimes)
+
+        # first handle food condition
+        foodList = newFood.asList()
+        if foodList:
+            distances = []
+
+            for food in foodList:
+                dist = manhattanDistance(newPos, food)
+                distances.append(dist)
+
+            minFoodDist = min(distances)
+            score += 1.0 / minFoodDist
+
+        # next handle the ghosts
+        for i in range(len(newGhostStates)):
+            ghostState = newGhostStates[i]
+            scaredTime = newScaredTimes[i]
+            ghostPos = ghostState.getPosition()
+            dist = manhattanDistance(newPos, ghostPos)
+
+            if scaredTime > 0 and dist > 0:
+                score += 20.0 / dist
+            else:
+                score -= 600.0
+
+        # I added this condition b/c otherwise sometimes Pacman gets stuck oscillating
+        if action == Directions.STOP:
+            score -= 10.0
+
+        return score
 
 def scoreEvaluationFunction(currentGameState: GameState):
     """
