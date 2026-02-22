@@ -136,7 +136,7 @@ class MinimaxAgent(MultiAgentSearchAgent):
         Returns whether or not the game state is a losing state
         """
         "*** YOUR CODE HERE ***"
-        actions = gameState.getLegalActions
+        actions = gameState.getLegalActions(self.depth)
         tot_agents = gameState.getNumAgents()
         next = []
         for action in actions:
@@ -152,6 +152,9 @@ class MinimaxAgent(MultiAgentSearchAgent):
 
 
         util.raiseNotDefined()
+    def minimax_helper(index, gameState, action):
+        agent_index = self.depth (gamestate())
+
 
 class AlphaBetaAgent(MultiAgentSearchAgent):
     """
