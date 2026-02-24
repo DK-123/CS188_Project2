@@ -219,8 +219,72 @@ class AlphaBetaAgent(MultiAgentSearchAgent):
         Returns the minimax action using self.depth and self.evaluationFunction
         """
         "*** YOUR CODE HERE ***"
-        util.raiseNotDefined()
+        '''
+        state = the current game state (aka positions of Pacman, ghosts, food, walls)
+        getLegalActions(0) gets all legal moves for agent 0 (Pacman)
+        agentIndex=0 means Pacman, ghosts are >= 1
+        '''
+        bestAction = None
+        bestScore = float('-inf')
+        alpha = float('-inf')
+        beta = float('inf')
+        
+        for action in gameState.getLegalActions(0):
+            successor = gameState.generateSuccessor(0, action)
+            score = self.alphaBetaPruning(successor, self.depth, 1, alpha, beta)
+            
+            if score > bestScore:
+                bestScore = score
+                bestAction = action
+            
+            alpha = max(alpha, bestScore)
+        
+        return bestAction
+    
+    # recurisve func to check if we should stop searching aka if game is won/lost or depth limit reached
+    def alphaBetaPruning(self, state, depth, agentIndex, alpha, beta):
+        if state.isWin() or state.isLose() or depth == 0:
+            return self.evaluationFunction(state)
+        
+        if agentIndex == 0:
+            return self.maxValue(state, depth, alpha, beta)
+        else:
+            return self.minValue(state, depth, agentIndex, alpha, beta)
 
+    # helper function to handle max logic; I followed the pseudo-code algorithm from spec
+    def maxValue(self, state, depth, alpha, beta):
+        v = float('-inf')
+        for action in state.getLegalActions(0):
+            successor = state.generateSuccessor(0, action)
+            v = max(v, self.alphaBetaPruning(successor, depth, 1, alpha, beta))
+            if v > beta:
+                return v
+            alpha = max(alpha, v)
+        return v
+
+    # helper function to handle min logic using pseudo-code from spec 
+    def minValue(self, state, depth, agentIndex, alpha, beta):
+        v = float('inf')
+        numAgents = state.getNumAgents()
+        nextAgent = agentIndex + 1
+        
+        # this condition is to check if all agents have moved (aka nextAgent exceeds total agents)
+        # if yes then we wrap to Pacman and decrease depth (1 round done)
+        # otherwise we continue to next ghost at same depth
+        if nextAgent == numAgents:
+            nextAgent = 0
+            nextDepth = depth - 1 
+        else:
+            nextDepth = depth
+        
+        for action in state.getLegalActions(agentIndex):
+            successor = state.generateSuccessor(agentIndex, action)
+            v = min(v, self.alphaBetaPruning(successor, nextDepth, nextAgent, alpha, beta))
+            if v < alpha:
+                return v
+            beta = min(beta, v)
+        return v
+                    
 class ExpectimaxAgent(MultiAgentSearchAgent):
     """
       Your expectimax agent (question 4)
