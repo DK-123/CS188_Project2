@@ -192,7 +192,8 @@ class MinimaxAgent(MultiAgentSearchAgent):
         Returns whether or not the game state is a losing state
         """
         "*** YOUR CODE HERE ***"
-        actions = gameState.getLegalActions(0)
+        actions = gameState.getLegalActions
+        tot_agents = gameState.getNumAgents()
         next = []
         for action in actions:
             if action == actions[0]:
@@ -203,16 +204,10 @@ class MinimaxAgent(MultiAgentSearchAgent):
                 next += [actions]
             if self.depth == tot_agents:
                 return next
-        while (self.depth )
-        
+
 
 
         util.raiseNotDefined()
-    def minimax_helper(index, gameState, action):
-        agent_index = self.depth (gamestate())
-        successor
-        return 
-
 
 class AlphaBetaAgent(MultiAgentSearchAgent):
     """
@@ -331,7 +326,7 @@ class ExpectimaxAgent(MultiAgentSearchAgent):
         else:
             return self.expectedValue(state, depth, agentIndex)
     
-    # helper func to handle Pacman's turn (b/c Pacman wants to maximize his score by picking  best action)
+    # helper func to handle Pacman's turn (b/c Pacman wants to maximize his score by picking best action)
     def maxValue(self, state, depth):
         v = float('-inf')
         
@@ -361,16 +356,3 @@ class ExpectimaxAgent(MultiAgentSearchAgent):
         expectedScore = total / len(legalActions)
         
         return expectedScore
-
-def betterEvaluationFunction(currentGameState: GameState):
-    """
-    Your extreme ghost-hunting, pellet-nabbing, food-gobbling, unstoppable
-    evaluation function (question 5).
-
-    DESCRIPTION: <write something here so we know what you did>
-    """
-    "*** YOUR CODE HERE ***"
-    util.raiseNotDefined()
-
-# Abbreviation
-better = betterEvaluationFunction
