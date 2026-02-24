@@ -326,7 +326,7 @@ class ExpectimaxAgent(MultiAgentSearchAgent):
         else:
             return self.expectedValue(state, depth, agentIndex)
     
-    # helper func to handle Pacman's turn (b/c Pacman wants to maximize his score by picking  best action)
+    # helper func to handle Pacman's turn (b/c Pacman wants to maximize his score by picking best action)
     def maxValue(self, state, depth):
         v = float('-inf')
         
@@ -356,16 +356,60 @@ class ExpectimaxAgent(MultiAgentSearchAgent):
         expectedScore = total / len(legalActions)
         
         return expectedScore
-
+    
 def betterEvaluationFunction(currentGameState: GameState):
     """
     Your extreme ghost-hunting, pellet-nabbing, food-gobbling, unstoppable
     evaluation function (question 5).
 
-    DESCRIPTION: <write something here so we know what you did>
+    DESCRIPTION: 
+    In this question, we evaluate states based on a couple different factors:
+    - Baseline game score - this basically provides the foundation that other heuristics build upon
+    - Distance to nearest food - Uses reciprocal of Manhattan distance to nearest food pellet
+       - Our rationale for this is that being close to food is valuable (aka the closer, the better)
+       - Example: 1 step away = +10 points, 10 steps away = +1 point
+    - Number of remaining food - Penalizes states with many remaining food pellets
+       - Our rationale for this is that fewer remaining food = closer to winning
+       - This encourages Pacman to actively clear the board rather than wander
+    - Distance to ghosts (danger vs opportunity)
+       - Our rationale for this is that we want to hunt scared ghosts so we make them worth 200 points
+         but otherwise we would want to avoid ghosts to stay alive so we penalize death
     """
     "*** YOUR CODE HERE ***"
-    util.raiseNotDefined()
+    if currentGameState.isWin():
+        return float('inf')
+    if currentGameState.isLose():
+        return float('-inf')
+    
+    pacmanPosition = currentGameState.getPacmanPosition()
+    foodList = currentGameState.getFood().asList()
+    ghostStates = currentGameState.getGhostStates()
+    
+    score = currentGameState.getScore()
+    
+    if foodList:
+        distances = []
+
+        for food in foodList:
+            dist = manhattanDistance(pacmanPosition, food)
+            distances.append(dist)
+
+        minFoodDist = min(distances)
+        score += 10.0 / minFoodDist
+    
+        # score -= 4.0 * len(foodList)
+    
+    for ghostState in ghostStates:
+        ghostPosition = ghostState.getPosition()
+        dist = manhattanDistance(pacmanPosition, ghostPosition)
+        
+        if ghostState.scaredTimer > 0 and dist > 0:
+            score += 200.0 / dist
+        else:
+            if dist <= 1:
+                score -= 1000.0
+    
+    return score
 
 # Abbreviation
 better = betterEvaluationFunction
