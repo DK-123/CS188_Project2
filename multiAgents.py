@@ -298,7 +298,64 @@ class ExpectimaxAgent(MultiAgentSearchAgent):
         legal moves.
         """
         "*** YOUR CODE HERE ***"
-        util.raiseNotDefined()
+
+        ''' 
+        from spec:
+        ExpectimaxAgent will no longer take the min over all ghost actions, but the expectation 
+        according to your agent’s model of how the ghosts act
+        '''
+        bestAction = None
+        bestScore = float('-inf')
+        
+        for action in gameState.getLegalActions(0):
+            successor = gameState.generateSuccessor(0, action)
+            score = self.expectimax(successor, self.depth, 1)
+            
+            if score > bestScore:
+                bestScore = score
+                bestAction = action
+        
+        return bestAction
+    
+    # recursive func that returns a number representing the expected value of this state
+    def expectimax(self, state, depth, agentIndex):        
+        if state.isWin() or state.isLose() or depth == 0:
+            return self.evaluationFunction(state)   
+        if agentIndex == 0:
+            return self.maxValue(state, depth)
+        else:
+            return self.expectedValue(state, depth, agentIndex)
+    
+    # helper func to handle Pacman's turn (b/c Pacman wants to maximize his score by picking  best action)
+    def maxValue(self, state, depth):
+        v = float('-inf')
+        
+        for action in state.getLegalActions(0):
+            successor = state.generateSuccessor(0, action)
+            v = max(v, self.expectimax(successor, depth, 1))
+        
+        return v
+    
+    # helper func to handle ghost turns (we assume ghosts move randomly) and returns expected score for Pacman
+    def expectedValue(self, state, depth, agentIndex):
+        numAgents = state.getNumAgents()
+        nextAgent = agentIndex + 1
+        legalActions = state.getLegalActions(agentIndex)
+        total = 0
+        
+        if nextAgent == numAgents:
+            nextAgent = 0
+            nextDepth = depth - 1
+        else:
+            nextDepth = depth
+        
+        for action in legalActions:
+            successor = state.generateSuccessor(agentIndex, action)
+            total += self.expectimax(successor, nextDepth, nextAgent)
+        
+        expectedScore = total / len(legalActions)
+        
+        return expectedScore
 
 def betterEvaluationFunction(currentGameState: GameState):
     """
