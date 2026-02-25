@@ -374,3 +374,58 @@ class ExpectimaxAgent(MultiAgentSearchAgent):
         expectedScore = total / len(legalActions)
         
         return expectedScore
+    
+def betterEvaluationFunction(currentGameState: GameState):
+    """
+    Your extreme ghost-hunting, pellet-nabbing, food-gobbling, unstoppable
+    evaluation function (question 5).
+    DESCRIPTION: Evaluates states using four factors: reciprocal distance to nearest food with a penalty
+    for remaining food count, reciprocal distance to nearest capsule with a penalty for
+    uneaten capsules, a reward for chasing scared ghosts, and a large penalty for being
+    adjacent to active ghosts with a distance-based penalty otherwise.
+    """
+    "*** YOUR CODE HERE ***"
+    position = currentGameState.getPacmanPosition()
+    food = currentGameState.getFood()
+    ghost = currentGameState.getGhostStates()
+    times = []
+    for state in ghost:
+        times.append(state.scaredTimer)
+    capsules = currentGameState.getCapsules()
+
+    score = currentGameState.getScore()
+
+    foodList = food.asList()
+    if foodList:
+        distances = []
+        for food in foodList:
+            distances.append(manhattanDistance(position, food))
+        minFoodDist = min(distances)
+        score += 20.0 / minFoodDist       
+        score -= 5.0 * len(foodList)      
+
+    if capsules:
+        capsuleDists = []
+        for capsule in capsules:
+            capsuleDists.append(manhattanDistance(position, capsule))
+        minCapsuleDist = min(capsuleDists)
+        score += 10.0 / (minCapsuleDist + 1)
+        score -= 30.0 * len(capsules)     
+
+    for i in range(len(ghost)):
+        ghostPos = ghost[i].getPosition()
+        dist = manhattanDistance(position, ghostPos)
+        time = times[i]
+
+        if time > 0:
+            score += 100.0 / (dist + 1)
+        else:
+            if dist < 2:
+                score -= 200.0
+            else:
+                score -= 10.0 / dist
+
+    return score
+
+# Abbreviation
+better = betterEvaluationFunction
